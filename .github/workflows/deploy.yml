@@ -31,16 +31,13 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --instance-ids "$INSTANCE_ID" \
-            --parameters 'commands=[
-              "set -e",
-              "cd /home/ec2-user/Anuvadation",
-              "git pull --ff-only origin main",
-              "export JAVA_HOME=/usr/lib/jvm/java-27-amazon-corretto.x86_64",
-              "export PATH=$JAVA_HOME/bin:$PATH",
-              "mvn clean package",
-              "sudo systemctl restart anuvadation",
-              "sudo systemctl is-active --quiet anuvadation"
-            ]' \
+            --parameters '{
+              "commands": [
+                "sudo -u ec2-user -H bash -lc '\''set -e; cd /home/ec2-user/Anuvadation; git pull --ff-only origin main; export JAVA_HOME=/usr/lib/jvm/java-27-amazon-corretto.x86_64; export PATH=$JAVA_HOME/bin:$PATH; mvn clean package'\''",
+                "sudo systemctl restart anuvadation",
+                "sudo systemctl is-active --quiet anuvadation"
+              ]
+            }' \
             --comment "Deploy Anuvadation from GitHub Actions" \
             --region "$AWS_REGION" \
             --query "Command.CommandId" \
